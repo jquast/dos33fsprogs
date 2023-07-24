@@ -955,9 +955,9 @@ static void display_help(char *name, int version_only) {
 	printf("  Where disk_image is a valid dos3.3 disk image\n"
 		"  and COMMAND is one of the following:\n");
 	printf("\tCATALOG\n");
-	printf("\tLOAD     apple_file <local_file>\n");
-	printf("\tSAVE     type local_file <apple_file>\n");
-	printf("\tBSAVE    [-a addr] [-l len] local_file <apple_file>\n");
+	printf("\tLOAD     apple_file [local_file]\n");
+	printf("\tSAVE     type local_file [apple_file]\n");
+	printf("\tBSAVE    [-a addr] [-l len] local_file [apple_file]\n");
 	printf("\tDELETE   apple_file\n");
 	printf("\tLOCK     apple_file\n");
 	printf("\tUNLOCK   apple_file\n");
@@ -1075,8 +1075,9 @@ int main(int argc, char **argv) {
 			break;
 		case 'l':
 			length=strtol(optarg,&endptr,0);
-			if (debug) fprintf(stderr,"Length=%d\n",address);
+			if (debug) fprintf(stderr,"Length=%d\n",length);
 			break;
+
 #if 0
 		case 't':
 			track=strtol(optarg,&endptr,0);
@@ -1228,16 +1229,56 @@ int main(int argc, char **argv) {
 
 			if (command==COMMAND_BSAVE) {
 				fprintf(stderr,"%s %s BSAVE "
-						"file_name apple_filename\n\n",
+						"[-a addr] [-l len] local_file [apple_file]\n\n",
 						argv[0],image);
 
 			}
 			else {
 				fprintf(stderr,"%s %s SAVE type "
-						"file_name apple_filename\n\n",
+						"local_file [apple_file]\n\n",
 						argv[0],image);
 			}
 			retval=-ERROR_INVALID_PARAMATER;
+			goto exit_and_close;
+		}
+
+		// check for optional -a and -l argument in command BSAVE [-a addr] [-l len] local_file [apple_file],
+		// this is done here only for non-linux systems instead of going through getopt(3), where 'optind' is
+		// handleled differently
+		while(optind < argc) {
+			if (strcmp (argv[optind], "-a") == 0) {
+				if (optind + 2 > argc) {
+					fprintf(stderr,"Error! BSAVE argument '-a' missing arguments: addr, local_file\n");
+					retval=-ERROR_INVALID_PARAMATER;
+					goto exit_and_close;
+				}
+				address = strtol(argv[optind + 1], &endptr, 0);
+				if (debug)
+					fprintf(stderr, "Address=%d\n", address);
+				optind += 2;
+			}
+			else if (strcmp(argv[optind], "-l") == 0)
+			{
+				if (optind + 2 > argc) {
+					fprintf(stderr, "Error! BSAVE argument '-l' missing arguments: size, local_file\n");
+					retval = -ERROR_INVALID_PARAMATER;
+					goto exit_and_close;
+				}
+				length = strtol(argv[optind + 1], &endptr, 0);
+				if (debug)
+					fprintf(stderr, "Length=%d\n", length);
+				optind += 2;
+			} else if (argv[optind][0] == '-') {
+					fprintf(stderr,"Error! Unknown BSAVE option, '%s', only '-a' and '-l' accepted\n",argv[optind]);
+					retval=-ERROR_INVALID_PARAMATER;
+					goto exit_and_close;
+			} else {
+					break;
+			}
+		}
+		if (optind == argc) {
+			fprintf(stderr, "Error! local_file argument required");
+			retval = -ERROR_INVALID_PARAMATER;
 			goto exit_and_close;
 		}
 
