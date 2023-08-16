@@ -1062,14 +1062,19 @@ int main(int argc, char **argv) {
 	unsigned char vtoc[BYTES_PER_SECTOR];
 	int retval=0;
 
+	for (c = 0; c < argc;c++) {
+		printf("argv[%d]=%s\n",c,argv[c]);
+	}
 	/* Check command line arguments */
-	while ((c = getopt (argc, argv,"t:s:dhvxy"))!=-1) {
-		switch (c) {
+	while ((c = getopt(argc, argv, "a:l:t:s:dhvxy")) != -1)
+		{
+			switch (c)
+			{
 
-		case 'd':
-			fprintf(stderr,"DEBUG enabled\n");
-			debug=1;
-			break;
+			case 'd':
+				fprintf(stderr, "DEBUG enabled\n");
+				debug = 1;
+				break;
 
 #if 0
 		case 't':
@@ -1094,7 +1099,9 @@ int main(int argc, char **argv) {
 			break;
 		}
 	}
-
+	for (c = 0; c < argc;c++) {
+		printf("argv[%d]=%s\n",c,argv[c]);
+	}
 	if (optind==argc) {
 		fprintf(stderr,"ERROR!  Must specify disk image!\n\n");
 		return -ERROR_INVALID_PARAMATER;
