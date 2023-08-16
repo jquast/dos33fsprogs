@@ -1058,6 +1058,7 @@ int main(int argc, char **argv) {
 	char *temp,*endptr;
 	int c;
 	int address=0, length=0;
+	int swp_optind=0;
 	unsigned char vtoc[BYTES_PER_SECTOR];
 	int retval=0;
 
@@ -1217,9 +1218,12 @@ int main(int argc, char **argv) {
 		if (debug) printf("\ttype=%c\n",type);
 
 		if (command==COMMAND_BSAVE) {
-			printf("- optind=%d argc=%d\n",optind,argc);
-			// check for optional BSAVE [-a addr] and [-l len] arguments
-			while ((c = getopt (argc, argv,"a:l:"))!=-1) {
+			printf("- optind=%d argc=%d\n", optind, argc);
+			// check for optional BSAVE [-a addr] and [-l len] arguments, store current
+			// value of optind, so that it may be rewound !
+			swp_optind = optind;
+			while ((c = getopt(argc, argv, "a:l:")) != -1)
+			{
 				switch (c) {
 					case 'a':
 						address=strtol(optarg,&endptr,0);
@@ -1234,9 +1238,15 @@ int main(int argc, char **argv) {
 
 				}
 			}
-			printf("- optind=%d argc=%d\n",optind,argc);
-			// BSD increments optind, while Linux does not. Perform small
-			// conditional check and re-increment if necessary
+			printf("* optind=%d argc=%d\n",optind,argc);
+			if(optind < swp_optind)
+			{
+				// BSD getopt(3) increments optind from second call of getopt(3)
+				// while Linux rewinds it. Perform small conditional check to restore
+				// position of optind for remaining argument parsing.
+				optind = swp_optind;
+			}
+			printf("^ optind=%d argc=%d\n", optind, argc);
 			if((optind < argc) && (!strncmp(argv[optind],"BSAVE",5))) optind++;
 			printf("+ optind=%d argc=%d\n",optind,argc);
 		}

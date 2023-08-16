@@ -21,6 +21,8 @@ run_test() {
 }
 
 cp empty.dsk test.dsk
+run_test "BSAVE SINCOS" \
+         "type=b" "Local filename: SINCOS" "Apple filename: SINCOS"
 run_test "BSAVE SINCOS EX1" \
          "type=b" "Local filename: SINCOS" "Apple filename: EX1"
 run_test "BSAVE -a 0x2000 SINCOS EX2" \
