@@ -1222,6 +1222,11 @@ int main(int argc, char **argv) {
 			// check for optional BSAVE [-a addr] and [-l len] arguments, store current
 			// value of optind, so that it may be rewound !
 			swp_optind = optind;
+			// forward argv past BSAVE command,
+			argv += (optind - 1);
+			argc -= (optind - 1);
+			optind = 1;
+			printf("? optind=%d argc=%d\n", optind, argc);
 			while ((c = getopt(argc, argv, "a:l:")) != -1)
 			{
 				switch (c) {
@@ -1238,14 +1243,14 @@ int main(int argc, char **argv) {
 
 				}
 			}
-			printf("* optind=%d argc=%d\n",optind,argc);
-			if(optind < swp_optind)
-			{
-				// BSD getopt(3) increments optind from second call of getopt(3)
-				// while Linux rewinds it. Perform small conditional check to restore
-				// position of optind for remaining argument parsing.
-				optind = swp_optind;
-			}
+			// printf("* optind=%d argc=%d\n",optind,argc);
+			// if(optind < swp_optind)
+			// {
+			// 	// BSD getopt(3) increments optind from second call of getopt(3)
+			// 	// while Linux rewinds it. Perform small conditional check to restore
+			// 	// position of optind for remaining argument parsing.
+			// 	optind = swp_optind;
+			// }
 			printf("^ optind=%d argc=%d\n", optind, argc);
 			if((optind < argc) && (!strncmp(argv[optind],"BSAVE",5))) optind++;
 			printf("+ optind=%d argc=%d\n",optind,argc);
