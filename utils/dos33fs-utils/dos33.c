@@ -1063,7 +1063,7 @@ int main(int argc, char **argv) {
 	int retval=0;
 
 	for (c = 0; c < argc;c++) {
-		printf("argv[%d]=%s\n",c,argv[c]);
+		printf("- argv[%d]=%s\n",c,argv[c]);
 	}
 	/* Check command line arguments */
 	while ((c = getopt(argc, argv, "a:l:t:s:dhvxy")) != -1)
@@ -1100,13 +1100,15 @@ int main(int argc, char **argv) {
 		}
 	}
 	for (c = 0; c < argc;c++) {
-		printf("argv[%d]=%s\n",c,argv[c]);
+		printf("+ argv[%d]=%s\n",c,argv[c]);
 	}
-	if (optind==argc) {
+	if (optind == argc)
+	{
 		fprintf(stderr,"ERROR!  Must specify disk image!\n\n");
 		return -ERROR_INVALID_PARAMATER;
 	}
 
+	printf("after first getopt, optind=%d (%s)\n", optind, argv[optind]);
 	/* get argument 1, which is image name */
 	strncpy(image,argv[optind],BUFSIZ-1);
 	dos_fd=open(image,O_RDWR);
@@ -1125,6 +1127,7 @@ int main(int argc, char **argv) {
 		retval=-ERROR_INVALID_PARAMATER;
 		goto exit_and_close;
 	}
+	printf("after next argument, optind=%d (%s) (command)\n", optind, argv[optind]);
 
 	/* Grab command */
 	strncpy(temp_string,argv[optind],BUFSIZ-1);
@@ -1136,6 +1139,7 @@ int main(int argc, char **argv) {
 
 	/* Move to next argument */
 	optind++;
+	printf("after next argument, optind=%d (%s) [...]\n", optind, argv[optind]);
 
 	command=lookup_command(temp_string);
 
