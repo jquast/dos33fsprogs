@@ -1218,15 +1218,24 @@ int main(int argc, char **argv) {
 		if (debug) printf("\ttype=%c\n",type);
 
 		if (command==COMMAND_BSAVE) {
-			printf("- optind=%d argc=%d\n", optind, argc);
-			// check for optional BSAVE [-a addr] and [-l len] arguments, store current
-			// value of optind, so that it may be rewound !
-			swp_optind = optind;
-			// forward argv past BSAVE command,
-			argv += (optind - 1);
-			argc -= (optind - 1);
+			//// check for optional BSAVE [-a addr] and [-l len] arguments, store current
+			//// value of optind, so that it may be rewound !
+			//swp_optind = optind;
+			//// forward argv past BSAVE command, because 'optind' is at different
+			//// value between bsd and linux ??
+			//optind = 1;
+			//printf("? optind=%d argc=%d\n", optind, argc);
+
+			// find position of 'BSAVE' command in argv,
+			swp_optind = 1;
+			while ((strncmp(argv[swp_optind], "BSAVE", 5)) && swp_optind < argc)
+				swp_optind++;
+			swp_optind++;
+			printf("- optind=%d => 1 swp_optind=%d argc=%d\n", optind, swp_optind, argc);
+			// forward argv past BSAVE command
+			argv += (swp_optind - 1);
+			argc -= (swp_optind - 1);
 			optind = 1;
-			printf("? optind=%d argc=%d\n", optind, argc);
 			while ((c = getopt(argc, argv, "a:l:")) != -1)
 			{
 				switch (c) {
@@ -1243,7 +1252,7 @@ int main(int argc, char **argv) {
 
 				}
 			}
-			// printf("* optind=%d argc=%d\n",optind,argc);
+			printf("* optind=%d argc=%d\n",optind,argc);
 			// if(optind < swp_optind)
 			// {
 			// 	// BSD getopt(3) increments optind from second call of getopt(3)
@@ -1251,9 +1260,9 @@ int main(int argc, char **argv) {
 			// 	// position of optind for remaining argument parsing.
 			// 	optind = swp_optind;
 			// }
-			printf("^ optind=%d argc=%d\n", optind, argc);
-			if((optind < argc) && (!strncmp(argv[optind],"BSAVE",5))) optind++;
-			printf("+ optind=%d argc=%d\n",optind,argc);
+			//printf("^ optind=%d argc=%d\n", optind, argc);
+			//if((optind < argc) && (!strncmp(argv[optind],"BSAVE",5))) optind++;
+			//printf("+ optind=%d argc=%d\n",optind,argc);
 		}
 
 		if (argc==optind) {
