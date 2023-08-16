@@ -1217,6 +1217,7 @@ int main(int argc, char **argv) {
 		if (debug) printf("\ttype=%c\n",type);
 
 		if (command==COMMAND_BSAVE) {
+			printf("- optind=%d argc=%d\n",optind,argc);
 			// check for optional BSAVE [-a addr] and [-l len] arguments
 			while ((c = getopt (argc, argv,"a:l:"))!=-1) {
 				switch (c) {
@@ -1233,6 +1234,11 @@ int main(int argc, char **argv) {
 
 				}
 			}
+			printf("- optind=%d argc=%d\n",optind,argc);
+			// BSD increments optind, while Linux does not. Perform small
+			// conditional check and re-increment if necessary
+			if((optind < argc) && (!strncmp(argv[optind],"BSAVE",5))) optind++;
+			printf("+ optind=%d argc=%d\n",optind,argc);
 		}
 
 		if (argc==optind) {
