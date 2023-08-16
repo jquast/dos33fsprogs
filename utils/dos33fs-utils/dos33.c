@@ -1075,6 +1075,16 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "DEBUG enabled\n");
 				debug = 1;
 				break;
+			case 'l':
+				length = strtol(optarg, &endptr, 0);
+				if (debug)
+					fprintf(stderr, "Length=%d\n", length);
+				break;
+			case 'a':
+				address = strtol(optarg, &endptr, 0);
+				if (debug)
+					fprintf(stderr, "Address=%d\n", address);
+				break;
 
 #if 0
 		case 't':
@@ -1229,15 +1239,17 @@ int main(int argc, char **argv) {
 		if (debug) printf("\ttype=%c\n",type);
 
 		if (command==COMMAND_BSAVE) {
-			//// check for optional BSAVE [-a addr] and [-l len] arguments, store current
-			//// value of optind, so that it may be rewound !
-			//swp_optind = optind;
-			//// forward argv past BSAVE command, because 'optind' is at different
-			//// value between bsd and linux ??
-			//optind = 1;
-			//printf("? optind=%d argc=%d\n", optind, argc);
-
-			// find position of 'BSAVE' command in argv,
+			// Find position of 'BSAVE' command in argv, and call getopt(3) a second time
+			// to forward position of optind beyond optional -a and -l arguments on BSD.
+			//
+			// This is necessary because BSD and Linux getopt(3) differs, linux
+			// will process '-a' and '-l' options and mutate argv for the value
+			// of optind to point to remaining arguments, "local_filename // [apple_file]".
+			//
+			// While BSD does not mutate argv, leaving optind at the position of
+			// the first unknown option, 'BSAVE' with remaining arguments,
+			// "[-a addr] [-l len] local_filename [apple_file]", and this is why we
+			// must call getopt(3) a second time in such a peculiar way.
 			optind = 1;
 			while ((strncmp(argv[swp_optind], "BSAVE", 5)) && swp_optind < argc)
 			{
@@ -1252,17 +1264,19 @@ int main(int argc, char **argv) {
 			while ((c = getopt(argc, argv, "a:l:")) != -1)
 			{
 				switch (c) {
-					case 'a':
-						address=strtol(optarg,&endptr,0);
-						if (debug) fprintf(stderr,"Address=%d\n",address);
-						break;
-					case 'l':
-						length=strtol(optarg,&endptr,0);
-						if (debug) fprintf(stderr,"Length=%d\n",length);
-						break;
-					case 'h': display_help(argv[0],0);
+					case 'h':
+						display_help(argv[0], 0);
 						return 0;
-
+					case 'l':
+						length = strtol(optarg, &endptr, 0);
+						if (debug)
+							fprintf(stderr, "Length=%d\n", length);
+						break;
+					case 'a':
+						address = strtol(optarg, &endptr, 0);
+						if (debug)
+							fprintf(stderr, "Address=%d\n", address);
+						break;
 				}
 			}
 			printf("* optind=%d argc=%d\n",optind,argc);
