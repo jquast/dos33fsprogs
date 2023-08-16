@@ -1063,7 +1063,7 @@ int main(int argc, char **argv) {
 	int retval=0;
 
 	/* Check command line arguments */
-	while ((c = getopt (argc, argv,"a:l:t:s:dhvxy"))!=-1) {
+	while ((c = getopt (argc, argv,"t:s:dhvxy"))!=-1) {
 		switch (c) {
 
 		case 'd':
@@ -1227,9 +1227,11 @@ int main(int argc, char **argv) {
 			//printf("? optind=%d argc=%d\n", optind, argc);
 
 			// find position of 'BSAVE' command in argv,
-			swp_optind = 1;
+			optind = 1;
 			while ((strncmp(argv[swp_optind], "BSAVE", 5)) && swp_optind < argc)
+			{
 				swp_optind++;
+			}
 			swp_optind++;
 			printf("- optind=%d => 1 swp_optind=%d argc=%d\n", optind, swp_optind, argc);
 			// forward argv past BSAVE command
