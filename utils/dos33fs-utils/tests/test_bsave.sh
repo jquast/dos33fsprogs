@@ -21,9 +21,12 @@ run_test() {
 }
 
 cp empty.dsk test.dsk
-run_test "BSAVE SINCOS EX1" "Local filename: SINCOS" "Apple filename: EX1"
-run_test "BSAVE -a 0x2000 SINCOS EX2" "Local filename: SINCOS" "Apple filename: EX2" "Address=8192"
-run_test "BSAVE -a 0x2000 -l 146 SINCOS EX3" "Local filename: SINCOS" "Apple filename: EX3" "Address=8192" "Length=146"
+run_test "BSAVE SINCOS EX1" \
+         "type=b" "Local filename: SINCOS" "Apple filename: EX1"
+run_test "BSAVE -a 0x2000 SINCOS EX2" \
+         "type=b" "Local filename: SINCOS" "Apple filename: EX2" "Address=8192"
+run_test "BSAVE -a 0x2000 -l 146 SINCOS EX3" \
+         "type=b" "Local filename: SINCOS" "Apple filename: EX3" "Address=8192" "Length=146"
 rm "$tempfile"
 if [ "$num_failed" -gt 0 ]; then
     echo "Test failed. $num_failed tests failed."
